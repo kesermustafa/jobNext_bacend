@@ -1,5 +1,5 @@
 import express, {Router} from "express";
-import authController from "../controllers/authController.js";
+import authController from "../controllers/auth.controller.js";
 
 const router : Router = express.Router();
 
@@ -7,12 +7,14 @@ const router : Router = express.Router();
 router.route("/register")
     .post(authController.register)
 
+router.route("/login")
+    .post(authController.login)
 
-router.route("/login").post(()=>{
-    console.log("login")
-})
-router.route("/refresh").post(()=>{console.log("refresh")})
-router.route("/logout").post(()=>{console.log("logout")})
+router.route("/refresh")
+    .post(authController.refresh)
+
+router.route("/logout")
+    .post(authController.logout)
 
 
 export default router;
