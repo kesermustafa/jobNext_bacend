@@ -1,6 +1,11 @@
 
-import {Model, QueryFilter, Document, UpdateQuery, QueryOptions, Query} from "mongoose";
+import mongoose, {Model, QueryFilter, Document, UpdateQuery, QueryOptions, Query, PopulateOptions} from "mongoose";
+import {AppError} from "../errors/AppError.js";
 
+interface FindOptions {
+    select?: string | string[] | Record<string, number | boolean>;
+    populate?: string | PopulateOptions | (string | PopulateOptions)[];
+}
 
 export abstract class BaseRepository<T extends Document> {
     protected model: Model<T>;
@@ -15,6 +20,39 @@ export abstract class BaseRepository<T extends Document> {
         if (!doc) throw new Error(this.entityName);
         return doc;
     }
+
+    async findById(id: string | mongoose.Types.ObjectId, options: FindOptions = {}): Promise<T> {
+        // 1. ID'yi temizle ve doğrula
+        const cleanId = id.toString().trim();
+
+        if (!mongoose.Types.ObjectId.isValid(cleanId)) {
+            throw new AppError("Geçersiz ID formatı", 400);
+        }
+
+        // 2. Sorguyu başlat
+        let query: Query<any, any> = this.model.findById(cleanId);
+
+        // 3. Seçenekleri uygula
+        if (options.select) {
+            query = query.select(options.select);
+        }
+
+        if (options.populate) {
+            query = query.populate(options.populate as any);
+        }
+
+        // 4. Veriyi getir
+        const doc = await query;
+
+        // 5. Veri yoksa hata fırlat (Senin throwIfNull metodun varsa onu kullan)
+        if (!doc) {
+            throw new AppError("Kayıt bulunamadı.", 404);
+        }
+
+        return doc as unknown as T;
+    }
+
+
 
     async create(data: Partial<T>): Promise<T> {
         return await this.model.create(data);
@@ -36,10 +74,8 @@ export abstract class BaseRepository<T extends Document> {
         return await query.exec(); // .exec() kullanmak her zaman daha güvenlidir
     }
 
-    async findById(id: string, options: QueryOptions = {}): Promise<T> {
-        const doc = await this.model.findById(id, null, options);
-        return this.throwIfNull(doc);
-    }
+
+
 
     async findAll(filter: QueryFilter<T> = {}, options: QueryOptions = {}): Promise<T[]> {
         let query: Query<T[], T> = this.model.find(filter);

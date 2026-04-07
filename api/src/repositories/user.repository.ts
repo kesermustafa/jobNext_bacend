@@ -1,10 +1,10 @@
 import {BaseRepository} from "./base.repository.js";
 import {IUser} from "../interface/user.interface.js";
-import users from "../models/Users.js";
+import users from "../models/UsersModel.js";
 
 
 
-export class UserRepository extends BaseRepository<IUser> {
+ export class UserRepository extends BaseRepository<IUser> {
     constructor() {
         super(users, "User");
     }

@@ -1,6 +1,5 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import {IUser} from "../interface/user.interface.js";
-import {ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP} from "../constants/auth.js";
 import {InvalidTokenError} from "../errors/SpecificErrors.js";
 import {AppError} from "../errors/AppError.js";
 
@@ -15,6 +14,7 @@ const getSecret = () => {
 
 export const generateTokens = async (user: IUser) => {
     const secret = getSecret();
+    const jti = crypto.randomUUID();
 
     const payload = {
         id: user._id.toString(),
@@ -23,15 +23,15 @@ export const generateTokens = async (user: IUser) => {
     };
 
     const accessToken = await new SignJWT(payload)
-        .setProtectedHeader({ alg: "HS256" })
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
         .setIssuedAt()
-        .setExpirationTime(ACCESS_TOKEN_EXP )
+        .setExpirationTime('1h')
         .sign(secret);
 
-    const refreshToken = await new SignJWT({ id: user._id.toString() })
-        .setProtectedHeader({ alg: "HS256" })
+    const refreshToken = await new SignJWT({ id: user._id.toString(), jti })
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
         .setIssuedAt()
-        .setExpirationTime(REFRESH_TOKEN_EXP)
+        .setExpirationTime('24h')
         .sign(secret);
 
     return { accessToken, refreshToken };

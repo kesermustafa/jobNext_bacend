@@ -33,7 +33,6 @@ const sendErrorDev = (err: AppError, res: Response): void => {
         status: err.status,
         error: err,
         message: err.message,
-        stack: err.stack
     });
 };
 

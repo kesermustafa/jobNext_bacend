@@ -7,6 +7,10 @@ export interface IUser extends Document {
     password?: string;
     passwordConfirm?: string;
     active: boolean;
+    country:string,
+    phone?: string,
+    description?:string,
+    isSeller: boolean,
     passwordChangedAt?: Date;
     passwordResetToken?: string;
     passwordResetExpires?: Date;

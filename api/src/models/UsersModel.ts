@@ -30,6 +30,28 @@ const userSchema = new Schema<IUser>(
             default: true,
             select: false,
         },
+
+        country: {
+            type: String,
+            trim: true,
+        },
+
+        phone: {
+            type: String,
+            trim: true,
+        },
+
+        isSeller: {
+            type: Boolean,
+            default: false,
+            select: false,
+        },
+
+        description: {
+            type: String,
+            trim: true,
+        },
+
         photo: {
             type: String,
             default: "default.jpg",

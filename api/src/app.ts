@@ -50,9 +50,11 @@ app.use('/api', limiter);
 app.use('/api/auth', authLimiter);
 
 app.use(express.json({ limit: '10kb' }));
+
 app.use(cookieParser());
 app.use(hpp());
 
+app.use(express.urlencoded({ extended: true }));
 
 /**
  * NoSQL Injection Koruması (Özyinelemeli/Recursive)
@@ -89,7 +91,6 @@ const sanitizeXSS = (obj: any): void => {
 // --- Middleware Entegrasyonu ---
 
 // Body parser'dan SONRA, Route'lardan ÖNCE eklemeli
-app.use(express.json({ limit: '10kb' })); // Önce body'yi oku
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     // Body temizliği
