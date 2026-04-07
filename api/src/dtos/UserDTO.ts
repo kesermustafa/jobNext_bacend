@@ -17,3 +17,4 @@ export const LoginUserSchema = z.object({
 
 export type CreateUserDto = z.infer<typeof CreateUserSchema>;
 export type LoginUserDto = z.infer<typeof LoginUserSchema>;
+

@@ -1,8 +1,9 @@
-import express from "express";
+import express, {Router} from "express";
 
 
+const router : Router = express.Router();
 
-const router = express.Router();
+
 
 
 
@@ -16,10 +17,6 @@ router.route("/:id")
     .get(()=>{})
     .patch(()=>{})
     .delete(()=>{})
-
-
-
-
 
 
 

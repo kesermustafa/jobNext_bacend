@@ -101,7 +101,6 @@ userSchema.pre<IUser>("save", async function () {
 userSchema.pre<IUser>("save", function () {
     if (!this.isModified("password") || this.isNew) return ;
     this.passwordChangedAt = new Date(Date.now() - 1000);
-
 });
 
 // Sorgu Filtreleme (Active Kontrolü)

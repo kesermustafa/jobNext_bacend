@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser'
 import hpp from 'hpp'
 import authRoutes from "./routes/authRoutes.js";
 import {globalErrorHandler} from "./middlewares/error.middleware.js";
+import gigRorutes from "./routes/gigRorutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app: Application = express();
 
@@ -119,13 +122,15 @@ app.use((req, res, next) => {
 
 
 app.use("/api/auth", authRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/gig", gigRorutes)
+app.use("/api/reviews", reviewRoutes)
 
 
-
-// Temel Route
+/*// Temel Route
 app.get('/', (req: Request, res: Response) => {
     res.send('API Çalışıyor! 🚀');
-});
+});*/
 
 app.get('/favicon.ico',
     (req: Request, res: Response, next: NextFunction) =>

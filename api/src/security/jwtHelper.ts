@@ -1,4 +1,3 @@
-
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import {IUser} from "../interface/user.interface.js";
 import {ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP} from "../constants/auth.js";

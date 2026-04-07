@@ -4,6 +4,7 @@ import {catchAsync} from "../utils/catchAsync.js";
 import {AuthService} from "../services/auth.service.js";
 
 import {ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP} from "../constants/auth.js";
+import {CreateUserSchema} from "../dtos/UserDTO.js";
 
 
 class AuthController {
@@ -21,8 +22,11 @@ class AuthController {
     }
 
     register = catchAsync(async (req: Request, res: Response) => {
+
+        const validatedData = CreateUserSchema.parse(req.body);
+
         const { user, accessToken, refreshToken } = await this.authService.registerUser(
-            req.body,
+            validatedData,
             req.ip,
             req.headers['user-agent']
         );
@@ -39,7 +43,11 @@ class AuthController {
             maxAge: REFRESH_TOKEN_EXP
         });
 
-        res.status(201).json({ status: "success", data: { user, accessToken } });
+        res.status(201)
+            .json({
+                status: "success",
+                data: { user, accessToken }
+            });
     });
 
     // Diğer metodlar (login, refresh, logout)...
