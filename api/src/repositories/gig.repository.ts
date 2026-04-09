@@ -1,6 +1,6 @@
 import {BaseRepository} from "./base.repository.js";
-import {IGig} from "../interface/gig.interface.js";
-import gigModel from "../models/GigModel.js";
+import {IGig} from "@/domain/interfaces/gig.interface.js";
+import gigModel from "@/domain/entities/GigModel.js";
 
 
 

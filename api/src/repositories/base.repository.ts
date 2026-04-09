@@ -1,6 +1,6 @@
 
 import mongoose, {Model, QueryFilter, Document, UpdateQuery, QueryOptions, Query, PopulateOptions} from "mongoose";
-import {AppError} from "../errors/AppError.js";
+import {AppError} from "@/shared/errors/AppError.js";
 
 interface FindOptions {
     select?: string | string[] | Record<string, number | boolean>;

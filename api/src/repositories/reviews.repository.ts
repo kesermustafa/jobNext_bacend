@@ -1,6 +1,6 @@
 import {BaseRepository} from "./base.repository.js";
-import {IReviews} from "../interface/reviews.interface.js";
-import reviews from "../models/ReviewsModel.js";
+import {IReviews} from "@/domain/interfaces/reviews.interface.js";
+import reviews from "@/domain/entities/ReviewsModel.js";
 
 
 export class ReviewsRepository extends BaseRepository<IReviews>{

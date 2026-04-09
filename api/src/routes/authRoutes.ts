@@ -1,8 +1,8 @@
 import express, {Router} from "express";
-import authController from "../controllers/auth.controller.js";
-import {CreateUserSchema, LoginUserSchema} from "../dtos/UserDTO.js";
-import {validate} from "../middlewares/validate.middleware.js";
-import {requireAuth} from "../middlewares/auth.middleware.js";
+import authController from "@/app/controllers/auth.controller.js";
+import {CreateUserSchema, LoginUserSchema} from "@/app/dtos/UserDTO.js";
+import {validate} from "@/shared/middlewares/validate.middleware.js";
+import {requireAuth} from "@/shared/middlewares/auth.middleware.js";
 
 const router : Router = express.Router();
 

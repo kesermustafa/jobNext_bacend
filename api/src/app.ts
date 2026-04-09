@@ -7,12 +7,15 @@ import xss from 'xss';
 import cookieParser from 'cookie-parser'
 import hpp from 'hpp'
 import authRoutes from "./routes/authRoutes.js";
-import {globalErrorHandler} from "./middlewares/error.middleware.js";
+import {globalErrorHandler} from "@/shared/middlewares/error.middleware.js";
 import gigRorutes from "./routes/gigRorutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import path from "node:path";
 
 const app: Application = express();
+
+const isProd = process.env.NODE_ENV === "production";
 
 app.set('trust proxy', 1);
 app.use(helmet());
@@ -48,6 +51,13 @@ const authLimiter = rateLimit({
 
 app.use('/api', limiter);
 app.use('/api/auth', authLimiter);
+
+app.use(
+    "/images",
+    express.static(
+        path.join(process.cwd(), isProd ? "build/public/images" : "src/public/images")
+    )
+);
 
 app.use(express.json({ limit: '10kb' }));
 

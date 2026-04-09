@@ -1,6 +1,6 @@
-import {IUser} from "../interface/user.interface.js";
+import {IUser} from "@/domain/interfaces/user.interface.js";
 import {BaseRepository} from "./base.repository.js";
-import userModel from "../models/UsersModel.js";
+import userModel from "@/domain/entities/UsersModel.js";
 
 export class AuthRepository extends BaseRepository<IUser> {
     constructor() {
@@ -8,7 +8,7 @@ export class AuthRepository extends BaseRepository<IUser> {
     }
 
     async findByEmailWithPassword(email: string) {
-       return await this.model.findOne({email}).select("+password");
+       return await this.model.findOne({email}).select("+password +isSeller");
     }
 
 }

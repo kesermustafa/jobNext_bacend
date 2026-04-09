@@ -1,6 +1,6 @@
 import {BaseRepository} from "./base.repository.js";
-import {IUser} from "../interface/user.interface.js";
-import users from "../models/UsersModel.js";
+import {IUser} from "@/domain/interfaces/user.interface.js";
+import users from "@/domain/entities/UsersModel.js";
 
 
 
