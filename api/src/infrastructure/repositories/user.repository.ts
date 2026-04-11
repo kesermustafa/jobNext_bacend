@@ -9,6 +9,8 @@ import users from "@/domain/entities/UsersModel.js";
         super(users, "User");
     }
 
+
+
     async findByEmailWithPassword(email: string): Promise<IUser | null> {
         return this.model.findOne({ email }).select("+password");
     }

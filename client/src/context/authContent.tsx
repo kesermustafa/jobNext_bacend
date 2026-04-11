@@ -1,108 +1,156 @@
-import {createContext, type JSX, useContext, useEffect, useState} from "react";
+import {
+    createContext,
+    type JSX,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import type {IFormUser, ILoginUser, IUser} from "../types";
 import api from "../api";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
+import {useNavigate} from "react-router-dom";
+import {getDecryptedToken, setEncryptedToken} from "../utils/tokenStorege.ts";
 
 type ContextType = {
-  user: IUser | null;
-  isLoading: boolean;
-  register: (user: IFormUser) => void;
-  login: (user: ILoginUser) => void;
-  logout: () => void;
+    user: IUser | null;
+    isLoading: boolean;
+    register: (user: IFormUser) => void;
+    login: (user: ILoginUser) => void;
+    logout: () => void;
 };
 
 export const AuthContext = createContext<ContextType>({
-  user: null,
-  isLoading: true,
-  register: () => {},
-  login: () => {},
-  logout: () => {},
+    user: null,
+    isLoading: true,
+    register: () => {
+    },
+    login: () => {
+    },
+    logout: () => {
+    },
 });
 
-export const AuthProvider = ({ children }: { children: JSX.Element }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<IUser | null>(null);
+export const AuthProvider = ({children}: { children: JSX.Element }) => {
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [user, setUser] = useState<IUser | null>(null);
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  // her sayfa yenilediğinde eleimizdeki token ile api'dan kullanıc verilierni iste
-  useEffect(() => {
-    // eğer token yoksa çalışmasın
-    const token = localStorage.getItem("token") || document.cookie;
+    // 🔥 APP AÇILDIĞINDA USER ÇEK
+    useEffect(() => {
 
-    if (!token) return setIsLoading(false);
+        if (user) return;
 
-    setIsLoading(true);
+        const fetchUser = async () => {
 
-    api
-      .get("/auth/profile")
-      .then((res) => setUser(res.data.user))
-      .catch((err) => {
-        localStorage.removeItem("token");
-        toast.info("Oturumunuzun süresi doldu. Tekrardan giriş yapın");
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+            /*const token = getDecryptedToken();
 
-  // kaydol
-  const register = (user: IFormUser) => {
-    api
-      .post("/auth/register", user, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then(() => {
-        toast.info("Hesabınız oluşturuldu. Giriş Yapabilirsiniz");
-        navigate("/login");
-      })
-      .catch((err) => toast.error(err.response?.data?.message));
-  };
+            if (!token) {
+                setIsLoading(false);
+                return;
+            }*/
 
-  // giriş yap
-  const login = (user: ILoginUser) => {
-    setIsLoading(true);
+            try {
+                const res = await api.get("/users/profile");
 
-    api
-      .post("/auth/login", user)
-      .then((res) => {
-        // kullanıcı state'inin güncelle
-        setUser(res.data.user);
+                const userData = res.data.data;
 
-        // tokeni local'e kaydet
-        localStorage.setItem("token", res.data.token);
+                setUser(userData);
 
-        // bildirim
-        toast.success("Oturumunuz açıldı");
+            } catch (err: any) {
+                console.error("Profil hatası:", err.response?.data);
 
-        // yönlendir
-        navigate("/");
-      })
-      .catch((err) => {
-        toast.error(err.response?.data?.message);
-      })
-      .finally(() => setIsLoading(false));
-  };
+                localStorage.removeItem("token");
+                setUser(null);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-  // çıkış yap
-  const logout = () => {
-    api
-      .post("/auth/logout")
-      .then(() => {
-        setUser(null);
-        localStorage.removeItem("token");
-        toast.info("Oturmunuz kapandı");
-      })
-      .catch((err) => console.log(err));
-  };
+        fetchUser();
+    }, [user]);
 
-  return (
-    <AuthContext.Provider value={{ user, isLoading, register, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    // ✅ REGISTER
+    const register = async (user: IFormUser) => {
+        try {
+
+            const formData = new FormData();
+
+            Object.entries(user).forEach(([key, value]) => {
+                if (key === "photo") return; // 🔥 skip
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+
+            if (user.photo instanceof File) {
+                formData.append("photo", user.photo);
+            }
+
+            await api.post("/auth/register", formData); // ❌ header YOK
+
+            toast.info("Hesabınız oluşturuldu. Giriş yapabilirsiniz");
+            navigate("/login");
+
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Kayıt başarısız");
+        }
+    };
+
+    // ✅ LOGIN
+    const login = async (loginData: ILoginUser) => {
+        setIsLoading(true);
+
+        try {
+            const res = await api.post("/auth/login", loginData);
+
+            const responseData = res.data;
+
+            const apiUser = responseData.data.user;
+            const token = responseData.data.accessToken;
+
+            // 🔐 Şifreli kaydet
+            setEncryptedToken(token);
+
+            // 👤 User set et
+            setUser(apiUser);
+
+            toast.success("Oturum açıldı");
+            navigate("/");
+        } catch (err: any) {
+            console.error("Login error:", err.response?.data);
+
+            toast.error(
+                err.response?.data?.message || "Giriş yapılırken hata oluştu"
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ✅ LOGOUT
+    const logout = async () => {
+        try {
+            await api.post("/auth/logout");
+        } catch (err) {
+            console.log(err);
+        } finally {
+            localStorage.removeItem("token");
+            setUser(null);
+            toast.info("Oturum kapandı");
+        }
+    };
+
+    return (
+        <AuthContext.Provider
+            value={{user, isLoading, register, login, logout}}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
-// contexte aboneliğimizi kolaylaştırıcak hook
+// 🔥 Hook
 export const useAuth = () => {
-  return useContext(AuthContext);
+    return useContext(AuthContext);
 };

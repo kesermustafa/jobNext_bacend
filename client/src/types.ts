@@ -1,97 +1,100 @@
 import type {JSX} from "react";
 
 export interface ICategory {
-  name: string;
-  path:string
-  icon: JSX.Element;
+    name: string;
+    path: string
+    icon: JSX.Element;
 }
 
 export interface IInfo {
-  title: string;
-  text: string;
+    title: string;
+    text: string;
 }
 
 export interface IFormUser {
-  username: string;
-  email: string;
-  photo: File;
-  country: string;
-  password: string;
-  isSeller: boolean;
-  phone?: string;
-  desc?: string;
+    name: string;
+    email: string;
+    photo: File;
+    country: string;
+    password: string;
+    passwordConfirm: string;
+    isSeller: boolean;
+    phone?: string;
+    desc?: string;
 }
 
 export interface IUser {
-  _id: string;
-  username: string;
-  email: string;
-  photo: string;
-  country: string;
-  password: string;
-  isSeller: boolean;
-  createdAt: string;
-  updatedDate: string;
-  desc?: string;
-  phone?: string;
+    _id: string;
+    name: string;
+    email: string;
+    photo: string;
+    country: string;
+    password: string;
+    isSeller: boolean;
+    active: boolean;
+    createdAt: string;
+    updatedDate: string;
+    desc?: string;
+    phone?: string;
+    role: string;
 }
 
 export interface ILoginUser {
-  username: string;
-  password: string;
+    email: string;
+    password: string;
 }
 
 export interface IInput {
-  label: string;
-  name: string;
-  required?: boolean;
-  disabled?: boolean;
-  type?: "text" | "email" | "password" | "number" | "file" | "textarea";
-  min?: number;
-  max?: number;
-  placeholder?: string;
-  multiple?: boolean;
+    label: string;
+    name: string;
+    required?: boolean;
+    disabled?: boolean;
+    type?: "text" | "email" | "password" | "number" | "file" | "textarea";
+    min?: number;
+    max?: number;
+    placeholder?: string;
+    multiple?: boolean;
 }
 
 export interface IGig {
-  _id: string;
-  user: {
     _id: string;
-    username: string;
-    photo: string;
-  };
-  title: string;
-  description: string;
-  reviewCount: number;
-  starCount: number;
-  coverImage: string;
-  images: string[];
-  category: string;
-  package_title: string;
-  package_description: string;
-  package_price: number;
-  package_features: string[];
-  package_duration: number;
-  package_revisions: number;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
+    user: {
+        _id: string;
+        username: string;
+        photo: string;
+    };
+    title: string;
+    description: string;
+    reviewCount: number;
+    starCount: number;
+    coverImage: string;
+    images: string[];
+    category: string;
+    package_title: string;
+    package_description: string;
+    package_price: number;
+    package_features: string[];
+    package_duration: number;
+    package_revisions: number;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
 }
 
 export interface IGigDetail extends IGig {
-  user: ISellerUser;
+    user: ISellerUser;
 }
 
 export interface ISellerUser {
-  _id: string;
-  username: string;
-  email: string;
-  country: string;
-  photo: string;
-  isSeller: true;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-  phone: string;
-  desc: string;
+    _id: string;
+    username: string;
+    email: string;
+    country: string;
+    photo: string;
+    isSeller: true;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    phone: string;
+    desc: string;
 }

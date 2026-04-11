@@ -9,24 +9,19 @@ import Footer from "./components/Footer.tsx";
 const App = () => {
     return (
 
-        <BrowserRouter>
-            <div className={'flex flex-col min-h-screen'}>
-                <Header/>
+        <div className={'flex flex-col min-h-screen'}>
+            <Header/>
 
-                <div className={'flex-1 mx-auto w-full'}>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                    </Routes>
-
-                </div>
-
-                <Footer/>
+            <div className={'flex-1 mx-auto w-full'}>
+                <Routes>
+                    <Route path="/" element={<Home/>}/>
+                    <Route path="/login" element={<Login/>}/>
+                    <Route path="/register" element={<Register/>}/>
+                </Routes>
             </div>
 
-
-        </BrowserRouter>
+            <Footer/>
+        </div>
 
     );
 };

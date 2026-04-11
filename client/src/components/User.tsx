@@ -1,10 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import React, {useState, useRef, useEffect} from 'react';
+import {Link} from "react-router-dom";
+import type {IUser} from "../types.ts";
+import {useAuth} from "../context/authContent.tsx";
 
-const User = () => {
-    const user = { photo: "https://picsum.photos/200" };
+type Props = {
+    data: IUser;
+    logout: () => void;
+};
+
+const User = ({data, logout}: Props) => {
+
     const [show, setShow] = useState<boolean>(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -29,8 +37,16 @@ const User = () => {
 
             <div onClick={() => setShow(prev => !prev)}
                  className={'flex justify-center items-center gap-1 cursor-pointer'}>
-                <span className={'text-nowrap text-green-600 font-semibold'}>User</span>
-                <img src={user?.photo} alt="avatar"
+                <span className={'text-nowrap text-gray-600 capitalize font-semibold'}>
+                    {data?.name.toLowerCase().split(' ')[0]}
+                </span>
+
+                <img src={
+                    data?.photo
+                        ? `${data.photo}`
+                        : "/default-avatar.png"
+                }
+                     alt="avatar"
                      className={'w-10 rounded-full object-cover bg-gray-200 border border-green-400'}/>
             </div>
 
@@ -49,7 +65,7 @@ const User = () => {
                     <Link onClick={close}
                           className={'bg-green-200 w-full py-2 text-nowrap hover:text-green-600 hover:font-semibold'}
                           to={'/my-gigs-5'}>Hizmetler</Link>
-                    <button onClick={close}
+                    <button onClick={logout}
                             className={'bg-red-200 w-full py-2 text-nowrap hover:text-red-600 hover:font-semibold'}>
                         Singup
                     </button>

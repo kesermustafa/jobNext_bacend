@@ -2,10 +2,11 @@ import React, {type InvalidEvent} from 'react';
 import type {ILoginUser} from "../../types.ts";
 import Input from "../../components/input";
 import {Link} from "react-router-dom";
+import {useAuth} from "../../context/authContent.tsx";
 
 const Login = () => {
 
- //   const { login } = useAuth();
+    const { login } = useAuth();
 
     // form gönderilince
     const handleSubmit = (e: InvalidEvent<HTMLFormElement>) => {
@@ -15,16 +16,16 @@ const Login = () => {
 
         const user = Object.fromEntries(formData.entries());
 
-       // login(user as unknown as ILoginUser);
+        login(user as unknown as ILoginUser);
     };
 
     return (
-        <div className="pt-24 max-w-[500px] mx-auto sm:min-w-[400px] max-sm:w-full">
+        <div className="pt-24 max-w-125 mx-auto sm:min-w-100 max-sm:w-full">
             <h1 className="title mb-10">Hesabınıza Giriş Yapın</h1>
 
             <form onSubmit={handleSubmit}>
-                <Input label="İsim" name="username" required />
-                <Input label="Şifre" name="password" required />
+                <Input label="Email" name="email" type="email" required />
+                <Input label="Şifre" name="password" type="password" required />
 
                 <button className="form-button">Giriş Yap</button>
             </form>

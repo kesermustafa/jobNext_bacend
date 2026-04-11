@@ -1,10 +1,17 @@
 import dotenv from 'dotenv';
-import app from './app.js';
-import {connectDB} from "./config/db.js";
 
 dotenv.config();
 
+import app from './app.js';
+import {connectDB} from "./config/db.js";
+
+
 const PORT = process.env.PORT || 5000;
+
+
+import {initCloudinary} from "./shared/utils/cloudinary.js";
+
+initCloudinary(); // 🔥 BURADA ÇAĞIR
 
 const startServer = async () => {
     await connectDB();

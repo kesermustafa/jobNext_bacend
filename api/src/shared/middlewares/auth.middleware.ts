@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import { catchAsync } from "@/shared/utils/catchAsync.js";
-import { UnauthorizedError } from "@/shared/errors/SpecificErrors.js";
-import { ForbiddenError } from "@/shared/errors/SpecificErrors.js";
+import {Request, Response, NextFunction} from "express";
+import {catchAsync} from "@/shared/utils/catchAsync.js";
+import {UnauthorizedError} from "@/shared/errors/SpecificErrors.js";
+import {ForbiddenError} from "@/shared/errors/SpecificErrors.js";
 import * as jwtHelper from "@/shared/security/jwtHelper.js";
-import {UserRepository} from "@/repositories/user.repository.js";
+import {UserRepository} from "@/infrastructure/repositories/user.repository.js";
 
 const userRepository = new UserRepository();
 
@@ -28,9 +28,10 @@ export const requireAuth = catchAsync(async (req: Request, res: Response, next: 
     // 3) Kullanıcı Kontrolü
     // decoded içindeki 'id'yi kullanıyoruz (jose payloaddan gelir)
     const currentUser = await userRepository.findOne(
-        { _id: decoded.id },
-        { select: "+active" }
+        {_id: decoded.id},
+        {select: "+active +isSeller"}
     );
+
 
     if (!currentUser) {
         return next(new UnauthorizedError("Bu token'a ait kullanıcı artık mevcut değil."));
@@ -49,6 +50,7 @@ export const requireAuth = catchAsync(async (req: Request, res: Response, next: 
         }
     }
 
+    req.userId = decoded.id;
     // 6) Req Objesine Ekleme
     req.user = currentUser;
     next();

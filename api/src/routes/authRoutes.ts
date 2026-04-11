@@ -1,13 +1,16 @@
 import express, {Router} from "express";
 import authController from "@/app/controllers/auth.controller.js";
-import {CreateUserSchema, LoginUserSchema} from "@/app/dtos/UserDTO.js";
+import {CreateUserSchema, LoginUserSchema} from "@/app/validators/user/user.schemaDTO.js";
 import {validate} from "@/shared/middlewares/validate.middleware.js";
 import {requireAuth} from "@/shared/middlewares/auth.middleware.js";
+import multer from 'multer';
 
-const router : Router = express.Router();
+const upload = multer({storage: multer.memoryStorage()});
+
+const router: Router = express.Router();
 
 router.route("/register")
-    .post(validate(CreateUserSchema),authController.register)
+    .post(upload.single('photo'), validate(CreateUserSchema), authController.register)
 
 router.route("/login")
     .post(validate(LoginUserSchema), authController.login)

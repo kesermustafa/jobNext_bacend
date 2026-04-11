@@ -1,6 +1,6 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, {Schema} from "mongoose";
 import bcrypt from "bcryptjs";
-import { randomBytes, createHash } from "node:crypto";
+import {randomBytes, createHash} from "node:crypto";
 import {IUser} from "@/domain/interfaces/user.interface.js";
 import {ROLES_LIST, UserRoles} from "@/shared/constants/UserRoles.js";
 
@@ -54,7 +54,7 @@ const userSchema = new Schema<IUser>(
 
         photo: {
             type: String,
-            default: "/images/users/profile_photo.webp",
+            default: "https://res.cloudinary.com/dcshlowqt/image/upload/v1775858076/profile_photo.png",
         },
         password: {
             type: String,
@@ -84,12 +84,12 @@ const userSchema = new Schema<IUser>(
             type: Date,
             default: null,
             select: false,
-            index: { expires: "90d" },
+            index: {expires: "90d"},
         },
     },
     {
         timestamps: true,
-        toObject: { virtuals: true },
+        toObject: {virtuals: true},
         toJSON: {
             virtuals: true,
             versionKey: false,
@@ -122,16 +122,16 @@ userSchema.pre<IUser>("save", async function () {
 
 // Şifre Değişim Tarihi Güncelleme
 userSchema.pre<IUser>("save", function () {
-    if (!this.isModified("password") || this.isNew) return ;
+    if (!this.isModified("password") || this.isNew) return;
     this.passwordChangedAt = new Date(Date.now() - 1000);
 });
 
 // Sorgu Filtreleme (Active Kontrolü)
 userSchema.pre(/^find/, function (this: mongoose.Query<any, IUser>, next) {
     const options = this.getOptions() || {};
-    if (this.getQuery().active !== undefined) return ;
-    if (options.includeInactive) return  ;
-    this.where({ active: true });
+    if (this.getQuery().active !== undefined) return;
+    if (options.includeInactive) return;
+    this.where({active: true});
 
 });
 

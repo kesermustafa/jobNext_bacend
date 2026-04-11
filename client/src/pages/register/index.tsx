@@ -1,12 +1,13 @@
-import React, { type InvalidEvent, useState} from 'react';
+import React, {type InvalidEvent, useState} from 'react';
 import {Link} from "react-router-dom";
 import type {IFormUser} from "../../types.ts";
 import Input from "../../components/input";
 import Toggle from "../../components/input/toggle.tsx";
+import {useAuth} from "../../context/authContent.tsx";
 
 const Register = () => {
     const [isSeller, setIsSeller] = useState<boolean>(false);
-    //  const {register} = useAuth();
+    const {register} = useAuth();
 
     const handleSubmit = (e: InvalidEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -20,9 +21,8 @@ const Register = () => {
         // satıcı hesabı bilgisini nesne içerisine kaydet
         (newUser as unknown as IFormUser).isSeller = isSeller;
 
-        console.log(newUser)
         // api'a kaydolma isteği at
-        //   register(newUser as unknown as IFormUser);
+        register(newUser as unknown as IFormUser);
     };
 
     return (
@@ -42,6 +42,7 @@ const Register = () => {
                     <Input label="Fotoğraf" name="photo" type="file"/>
                     <Input label="Ülke" required={true} name="country"/>
                     <Input label="Şifre" required={true} name="password"/>
+                    <Input label="Şifre Onay" required={true} name="passwordConfirm"/>
                 </div>
 
                 <div>

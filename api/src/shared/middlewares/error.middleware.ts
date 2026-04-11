@@ -1,6 +1,6 @@
-
-import { Request, Response, NextFunction } from 'express';
+import {Request, Response, NextFunction} from 'express';
 import {AppError} from "../errors/AppError.js";
+import {ZodError} from "zod";
 
 
 // Mongoose Hatalarını Yakalamak İçin Yardımcı Fonksiyonlar (Tiplerle)
@@ -60,29 +60,35 @@ export const globalErrorHandler = (
     res: Response,
     next: NextFunction
 ): void => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
+
+    if (err instanceof ZodError) {
+        res.status(400).json({
+            status: "fail",
+            message: "Validation failed",
+            errors: err.issues.map(e => ({
+                field: e.path.join("."),
+                message: e.message,
+            })),
+        });
+        return;
+    }
+
+    // Dönüşümleri her ortamda önce yap
+    let error = {...err, message: err.message};
+
+    if (err.code === 'LIMIT_FILE_SIZE') error = new AppError('Dosya boyutu çok büyük! Maksimum limit 10MB.', 400);
+    if (err.name === 'CastError') error = handleCastErrorDB(error);
+    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (err.name === 'JsonWebTokenError' || err.code === 'ERR_JWT_INVALID') error = handleJWTError();
+    if (err.name === 'TokenExpiredError' || err.code === 'ERR_JWT_EXPIRED') error = handleJWTExpiredError();
+
+    error.statusCode = error.statusCode || 500;
+    error.status = error.status || 'error';
 
     if (process.env.NODE_ENV === 'development') {
-        sendErrorDev(err, res);
+        sendErrorDev(error, res);   // ← dönüştürülmüş error
     } else {
-        let error = { ...err };
-        error.message = err.message;
-
-        // Multer / Dosya Boyutu Hatası
-        if (err.code === 'LIMIT_FILE_SIZE') {
-            error = new AppError('Dosya boyutu çok büyük! Maksimum limit 10MB.', 400);
-        }
-
-        // Mongoose Hata Yakalama
-        if (err.name === 'CastError') error = handleCastErrorDB(error);
-        if (err.code === 11000) error = handleDuplicateFieldsDB(error);
-        if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
-
-        // JWT Hata Yakalama (jose veya jwt paketlerinden gelen hata isimleri)
-        if (err.name === 'JsonWebTokenError' || err.code === 'ERR_JWT_INVALID') error = handleJWTError();
-        if (err.name === 'TokenExpiredError' || err.code === 'ERR_JWT_EXPIRED') error = handleJWTExpiredError();
-
         sendErrorProd(error, res);
     }
 };

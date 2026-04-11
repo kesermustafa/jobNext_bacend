@@ -1,5 +1,4 @@
-
-import mongoose, {Model, QueryFilter, Document, UpdateQuery, QueryOptions, Query, PopulateOptions} from "mongoose";
+import mongoose, {Model, QueryFilter, Document, QueryOptions, Query, PopulateOptions} from "mongoose";
 import {AppError} from "@/shared/errors/AppError.js";
 
 interface FindOptions {
@@ -7,32 +6,29 @@ interface FindOptions {
     populate?: string | PopulateOptions | (string | PopulateOptions)[];
 }
 
-export abstract class BaseRepository<T extends Document> {
-    protected model: Model<T>;
+export abstract class BaseRepository<T> {
+    protected model: Model<any>;
     protected entityName: string;
 
-    constructor(model: Model<T>, entityName: string) {
+    constructor(model: Model<any>, entityName: string) {
         this.model = model;
         this.entityName = entityName;
     }
 
-    protected throwIfNull(doc: T | null): T {
-        if (!doc) throw new Error(this.entityName);
-        return doc;
+    protected throwIfNull(doc: any): T {
+        if (!doc) throw new AppError(`${this.entityName} bulunamadı`, 404);
+        return doc as T;
     }
 
     async findById(id: string | mongoose.Types.ObjectId, options: FindOptions = {}): Promise<T> {
-        // 1. ID'yi temizle ve doğrula
         const cleanId = id.toString().trim();
 
         if (!mongoose.Types.ObjectId.isValid(cleanId)) {
             throw new AppError("Geçersiz ID formatı", 400);
         }
 
-        // 2. Sorguyu başlat
-        let query: Query<any, any> = this.model.findById(cleanId);
+        let query = this.model.findById(cleanId);
 
-        // 3. Seçenekleri uygula
         if (options.select) {
             query = query.select(options.select);
         }
@@ -41,29 +37,20 @@ export abstract class BaseRepository<T extends Document> {
             query = query.populate(options.populate as any);
         }
 
-        // 4. Veriyi getir
-        const doc = await query;
-
-        // 5. Veri yoksa hata fırlat (Senin throwIfNull metodun varsa onu kullan)
-        if (!doc) {
-            throw new AppError("Kayıt bulunamadı.", 404);
-        }
-
-        return doc as unknown as T;
+        const doc = await query.exec();
+        return this.throwIfNull(doc);
     }
 
 
-
-    async create(data: Partial<T>): Promise<T> {
-        return await this.model.create(data);
+    async create(data: any): Promise<T> {
+        const doc = await this.model.create(data);
+        return doc as T;
     }
 
     async findOne(filter: QueryFilter<T>, options: QueryOptions = {}): Promise<T | null> {
-        // Query tipini açıkça belirtiyoruz: Query<DönenTip | null, AnaTip>
-        let query: Query<T | null, T> = this.model.findOne(filter);
+        let query = this.model.findOne(filter);
 
         if (options.select) {
-            // 'any' cast işlemi yaparak Mongoose'un katı tip kontrolünü esnetiyoruz
             query = query.select(options.select as any);
         }
 
@@ -71,10 +58,9 @@ export abstract class BaseRepository<T extends Document> {
             query = query.populate(options.populate as any);
         }
 
-        return await query.exec(); // .exec() kullanmak her zaman daha güvenlidir
+        const doc = await query.exec();
+        return doc as T | null;
     }
-
-
 
 
     async findAll(filter: QueryFilter<T> = {}, options: QueryOptions = {}): Promise<T[]> {
@@ -87,16 +73,17 @@ export abstract class BaseRepository<T extends Document> {
         return await query.exec();
     }
 
-    async update(id: string, data: UpdateQuery<T>): Promise<T> {
+    async update(id: string, data: any): Promise<T> {
         const doc = await this.model.findByIdAndUpdate(id, data, {
             new: true,
             runValidators: true,
-        });
+        }).exec();
+
         return this.throwIfNull(doc);
     }
 
     async delete(id: string): Promise<T> {
-        const doc = await this.model.findByIdAndDelete(id);
+        const doc = await this.model.findByIdAndDelete(id).exec();
         return this.throwIfNull(doc);
     }
 }

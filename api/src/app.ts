@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, {Application, Request, Response, NextFunction} from 'express';
 
 import cors from 'cors';
 import helmet from 'helmet';
@@ -12,6 +12,8 @@ import gigRorutes from "./routes/gigRorutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import path from "node:path";
+import {AppError} from "@/shared/errors/AppError.js";
+
 
 const app: Application = express();
 
@@ -22,10 +24,11 @@ app.use(helmet());
 
 // Middlewares
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
 }));
 
 // Rate Limiting
@@ -54,17 +57,15 @@ app.use('/api/auth', authLimiter);
 
 app.use(
     "/images",
-    express.static(
-        path.join(process.cwd(), isProd ? "build/public/images" : "src/public/images")
-    )
+    express.static(path.join(process.cwd(), "src/public/images"))
 );
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({limit: '10kb'}));
 
 app.use(cookieParser());
 app.use(hpp());
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 /**
  * NoSQL Injection Koruması (Özyinelemeli/Recursive)
@@ -123,32 +124,25 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use((req, res, next) => {
     req.setTimeout(10000, () => {
         if (!res.headersSent) {
-            next(new Error('İstek zaman aşımına uğradı.' ));
+            next(new Error('İstek zaman aşımına uğradı.'));
         }
     });
     next();
 });
 
-// Route'lar buraya gelecek...
-
 
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
-app.use("/api/gig", gigRorutes)
+app.use("/api/gigs", gigRorutes)
 app.use("/api/reviews", reviewRoutes)
 
 
-/*// Temel Route
-app.get('/', (req: Request, res: Response) => {
-    res.send('API Çalışıyor! 🚀');
-});*/
-
 app.get('/favicon.ico',
     (req: Request, res: Response, next: NextFunction) =>
-    res.status(204).end());
+        res.status(204).end());
 
 app.all(/.*/, (req: Request, res: Response, next: NextFunction) => {
-    next(new Error(`Cannot find ${req.originalUrl} on this server!`));
+    next(new AppError(`Cannot find ${req.originalUrl} on this server!`));
 });
 
 app.use(globalErrorHandler)

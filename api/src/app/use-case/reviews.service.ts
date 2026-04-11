@@ -1,13 +1,12 @@
-import {ReviewsRepository} from "../../repositories/reviews.repository.js";
+import {ReviewsRepository} from "@/infrastructure/repositories/reviews.repository.js";
 
-export class ReviewsService{
+export class ReviewsService {
 
-    private reviewsRepository:ReviewsRepository;
+    private reviewsRepository: ReviewsRepository;
 
-    constructor(){
+    constructor() {
         this.reviewsRepository = new ReviewsRepository();
     }
-
 
 
 }

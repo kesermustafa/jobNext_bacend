@@ -1,9 +1,10 @@
-
 import {Request, Response, NextFunction, CookieOptions} from "express";
 import {catchAsync} from "@/shared/utils/catchAsync.js";
 import {AuthService} from "@/app/use-case/auth.service.js";
 import {ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP} from "@/shared/constants/auth.js";
 import {UnauthorizedError} from "@/shared/errors/SpecificErrors.js";
+import {uploadFromBuffer} from "@/shared/utils/cloudinary.js";
+import {CreateUserDto} from "@/app/validators/user/user.schemaDTO.js";
 
 class AuthController {
     private authService: AuthService;
@@ -21,9 +22,19 @@ class AuthController {
 
     register = catchAsync(async (req: Request, res: Response) => {
 
-        const validatedData = req.validated!.body;
+        let photoUrl: string | undefined;
 
-        const { user, accessToken, refreshToken } = await this.authService.registerUser(
+        if (req.file?.buffer) {
+            const uploadResult = await uploadFromBuffer(req.file.buffer, "avatars", req.file.mimetype);
+            photoUrl = uploadResult.secure_url;
+        }
+
+        const validatedData: CreateUserDto = {
+            ...req.validated!.body,
+            ...(photoUrl && {photo: photoUrl})
+        };
+
+        const {user, accessToken, refreshToken} = await this.authService.registerUser(
             validatedData,
             req.ip,
             req.headers['user-agent']
@@ -42,7 +53,7 @@ class AuthController {
         res.status(201)
             .json({
                 status: "success",
-                data: { user, accessToken }
+                data: {user, accessToken}
             });
     });
 
@@ -50,7 +61,7 @@ class AuthController {
 
         const validatedData = req.validated!.body;
 
-        const { user, accessToken, refreshToken } =
+        const {user, accessToken, refreshToken} =
             await this.authService.login(validatedData, req.ip, req.headers['user-agent']);
 
         res.cookie('accessToken', accessToken, {
@@ -65,7 +76,10 @@ class AuthController {
 
         res.status(200).json({
             status: "success",
-            data: { user, accessToken }
+            data: {
+                user: user.toJSON(),
+                accessToken
+            }
         })
     });
 
@@ -93,7 +107,7 @@ class AuthController {
     });
 
     refresh = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { refreshToken: oldToken } = req.cookies;
+        const {refreshToken: oldToken} = req.cookies;
 
         if (!oldToken) {
             return next(new UnauthorizedError("Lütfen tekrar giriş yapın."));

@@ -3,11 +3,12 @@ import {Link} from "react-router-dom";
 import {IoSearch} from "react-icons/io5";
 import Links from "../Links.tsx";
 import User from "../User.tsx";
+import {useAuth} from "../../context/authContent.tsx";
 
 
 const Header = () => {
 
-    const user = true
+    const { user, logout } = useAuth();
 
     return (
         <div>
@@ -24,7 +25,7 @@ const Header = () => {
                 </form>
 
                 <div className={'flex items-center gap-2 relative group'}>
-                    { user ? <User/> : <Links/> }
+                    {user ? <User data={user} logout={logout} /> : <Links />}
                 </div>
 
 
